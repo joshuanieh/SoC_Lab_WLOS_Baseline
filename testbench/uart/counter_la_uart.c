@@ -134,41 +134,51 @@ void main()
 	//mm
 	reg_mprj_datal = 0xAB400000;
 	int *tmp1 = matmul();
-	reg_mprj_datal = *tmp1 << 16;
-	reg_mprj_datal = *(tmp1+1) << 16;
-	reg_mprj_datal = *(tmp1+2) << 16;
-	reg_mprj_datal = *(tmp1+3) << 16;	
+	int j;
+	for(j=0; j<16; j++){
+		reg_mprj_datal = *(tmp1+j) << 16;
+	}
+	// reg_mprj_datal = *tmp1 << 16;
+	// reg_mprj_datal = *(tmp1+1) << 16;
+	// reg_mprj_datal = *(tmp1+2) << 16;
+	// reg_mprj_datal = *(tmp1+3) << 16;	
 	reg_mprj_datal = 0xAB510000;
 
 	//qs
 	reg_mprj_datal = 0xAB400000;
 	int* tmp2 = qsort();
-	reg_mprj_datal = *tmp2 << 16;
-	reg_mprj_datal = *(tmp2+1) << 16;
-	reg_mprj_datal = *(tmp2+2) << 16;
-	reg_mprj_datal = *(tmp2+3) << 16;
-	reg_mprj_datal = *(tmp2+4) << 16;
-	reg_mprj_datal = *(tmp2+5) << 16;
-	reg_mprj_datal = *(tmp2+6) << 16;
-	reg_mprj_datal = *(tmp2+7) << 16;
-	reg_mprj_datal = *(tmp2+8) << 16;
-	reg_mprj_datal = *(tmp2+9) << 16;	
+	for(j=0; j<10; j++){
+		reg_mprj_datal = *(tmp2+j) << 16;
+	}
+	// reg_mprj_datal = *tmp2 << 16;
+	// reg_mprj_datal = *(tmp2+1) << 16;
+	// reg_mprj_datal = *(tmp2+2) << 16;
+	// reg_mprj_datal = *(tmp2+3) << 16;
+	// reg_mprj_datal = *(tmp2+4) << 16;
+	// reg_mprj_datal = *(tmp2+5) << 16;
+	// reg_mprj_datal = *(tmp2+6) << 16;
+	// reg_mprj_datal = *(tmp2+7) << 16;
+	// reg_mprj_datal = *(tmp2+8) << 16;
+	// reg_mprj_datal = *(tmp2+9) << 16;	
 	reg_mprj_datal = 0xAB510000;
 
 	//fir
 	reg_mprj_datal = 0xAB400000;
 	int* tmp3 = fir();
-	reg_mprj_datal = *tmp3 << 16;
-	reg_mprj_datal = *(tmp3+1) << 16;
-	reg_mprj_datal = *(tmp3+2) << 16;
-	reg_mprj_datal = *(tmp3+3) << 16;
-	reg_mprj_datal = *(tmp3+4) << 16;
-	reg_mprj_datal = *(tmp3+5) << 16;
-	reg_mprj_datal = *(tmp3+6) << 16;
-	reg_mprj_datal = *(tmp3+7) << 16;
-	reg_mprj_datal = *(tmp3+8) << 16;
-	reg_mprj_datal = *(tmp3+9) << 16;
-	reg_mprj_datal = *(tmp3+10) << 16;	
+	for(j=0; j<11; j++){
+		reg_mprj_datal = *(tmp3+j) << 16;
+	}
+	// reg_mprj_datal = *tmp3 << 16;
+	// reg_mprj_datal = *(tmp3+1) << 16;
+	// reg_mprj_datal = *(tmp3+2) << 16;
+	// reg_mprj_datal = *(tmp3+3) << 16;
+	// reg_mprj_datal = *(tmp3+4) << 16;
+	// reg_mprj_datal = *(tmp3+5) << 16;
+	// reg_mprj_datal = *(tmp3+6) << 16;
+	// reg_mprj_datal = *(tmp3+7) << 16;
+	// reg_mprj_datal = *(tmp3+8) << 16;
+	// reg_mprj_datal = *(tmp3+9) << 16;
+	// reg_mprj_datal = *(tmp3+10) << 16;	
 	reg_mprj_datal = 0xAB510000;
 
 
