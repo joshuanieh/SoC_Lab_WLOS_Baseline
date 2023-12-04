@@ -160,6 +160,7 @@ module uart_tb;
 		$finish;
 	end
 	initial begin
+		$monitor("checkbits=%h at time %t", checkbits,$time);
 		fork
 			mm_test;
 			latency_count;

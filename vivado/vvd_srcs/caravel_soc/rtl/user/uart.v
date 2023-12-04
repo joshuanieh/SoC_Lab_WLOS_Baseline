@@ -1,4 +1,6 @@
 module uart #(
+    parameter BITS = 32,
+    parameter DELAYS=10,
   parameter BAUD_RATE = 9600 
 )(
 `ifdef USE_POWER_PINS
@@ -16,6 +18,11 @@ module uart #(
   input wire    [31:0] wbs_adr_i,
   output wire   wbs_ack_o,
   output wire   [31:0] wbs_dat_o,
+  
+    // Logic Analyzer Signals
+    input  [127:0] la_data_in,
+    output [127:0] la_data_out,
+    input  [127:0] la_oenb,
 
   // IO ports
   input  [`MPRJ_IO_PADS-1:0] io_in, // The io_in[..] signals are from the pad to the user project and are always
@@ -34,6 +41,8 @@ module uart #(
   // UART 
   wire  tx;
   wire  rx;
+  wire    [31:0] wbs_dat_uart;
+  wire wbs_ack_uart;
 
   assign io_oeb[6] = 1'b0; // Set mprj_io_31 to output
   assign io_oeb[5] = 1'b1; // Set mprj_io_30 to input
@@ -61,6 +70,8 @@ module uart #(
 
   wire [31:0] clk_div;
   assign clk_div = 40000000 / BAUD_RATE;
+    wire clk = (~la_oenb[64]) ? la_data_in[64]: wb_clk_i;
+    wire rst = (~la_oenb[65]) ? la_data_in[65]: wb_rst_i;
 
   uart_receive receive(
     .rst_n      (~wb_rst_i  ),
@@ -93,8 +104,8 @@ module uart #(
 	.i_wb_we	(wbs_we_i	),
 	.i_wb_dat	(wbs_dat_i),
 	.i_wb_sel	(wbs_sel_i),
-	.o_wb_ack	(wbs_ack_o),
-	.o_wb_dat (wbs_dat_o),
+	.o_wb_ack	(wbs_ack_uart),
+	.o_wb_dat (wbs_dat_uart),
 	.i_rx		  (rx_data	),
   .i_irq    (irq      ),
   .i_frame_err  (frame_err),
@@ -105,5 +116,39 @@ module uart #(
   .i_tx_busy    (tx_busy  ),
 	.o_tx_start	  (tx_start )
   );
+  
+    reg ready;
+    reg [BITS-17:0] delayed_count;
+    always @(posedge clk) begin
+        if (rst) begin
+            ready <= 1'b0;
+            delayed_count <= 16'b0;
+        end else begin
+            ready <= 1'b0;
+            if ( valid && !ready ) begin
+                if ( delayed_count == DELAYS ) begin
+                    delayed_count <= 16'b0;
+                    ready <= 1'b1;
+                end else begin
+                    delayed_count <= delayed_count + 1;
+                end
+            end
+        end
+    end
+  
+    wire [31:0] rdata; 
+    assign decoded = wbs_adr_i[31:20] == 12'h380 ? 1'b1 : 1'b0;
+    assign valid = wbs_cyc_i && wbs_stb_i && decoded; 
+    wire [3:0] wstrb = wbs_sel_i & {4{wbs_we_i}};
+    assign wbs_dat_o = valid ? rdata : wbs_dat_uart;
+    assign wbs_ack_o = valid ? ready : wbs_ack_uart;
+    bram user_bram (
+        .CLK(clk),
+        .WE0(wstrb),
+        .EN0(valid),
+        .Di0(wbs_dat_i),
+        .Do0(rdata),
+        .A0(wbs_adr_i)
+    );
 
 endmodule
