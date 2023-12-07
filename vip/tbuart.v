@@ -114,9 +114,13 @@ module tbuart (
 		if(recv_state==R_STOP_BIT)begin
 			recv_buf_data <= {recv_buf_data, recv_pattern};
 			$display("recevied word %d at time %t", recv_pattern, $time);
-			$finish;
+			if (recv_pattern == 10) begin
+				$display("rx received finish pattern \\n");
+			end
+			// $finish;
 		end
 	end
+
 	
 	// --------------------Transmitter------------------------//
 	always@(posedge clk)begin

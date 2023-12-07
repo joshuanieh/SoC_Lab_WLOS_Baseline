@@ -131,6 +131,15 @@ void main()
 	// Configure LA probes from [63:32] as inputs to disable counter write
 	reg_la1_oenb = reg_la1_iena = 0x00000000; 
 
+#ifdef USER_PROJ_IRQ0_EN	
+	// unmask USER_IRQ_0_INTERRUPT
+	mask = irq_getmask();
+	mask |= 1 << USER_IRQ_0_INTERRUPT; // USER_IRQ_0_INTERRUPT = 2
+	irq_setmask(mask);
+	// enable user_irq_0_ev_enable
+	user_irq_0_ev_enable_write(1);	
+#endif
+
 	//mm
 	reg_mprj_datal = 0xAB400000;
 	int *tmp1 = matmul();
@@ -145,7 +154,7 @@ void main()
 	reg_mprj_datal = 0xAB510000;
 
 	//qs
-	reg_mprj_datal = 0xAB400000;
+	reg_mprj_datal = 0xAB410000;
 	int* tmp2 = qsort();
 	for(j=0; j<10; j++){
 		reg_mprj_datal = *(tmp2+j) << 16;
@@ -160,10 +169,10 @@ void main()
 	// reg_mprj_datal = *(tmp2+7) << 16;
 	// reg_mprj_datal = *(tmp2+8) << 16;
 	// reg_mprj_datal = *(tmp2+9) << 16;	
-	reg_mprj_datal = 0xAB510000;
+	reg_mprj_datal = 0xAB520000;
 
 	//fir
-	reg_mprj_datal = 0xAB400000;
+	reg_mprj_datal = 0xAB420000;
 	int* tmp3 = fir();
 	for(j=0; j<11; j++){
 		reg_mprj_datal = *(tmp3+j) << 16;
@@ -179,7 +188,7 @@ void main()
 	// reg_mprj_datal = *(tmp3+8) << 16;
 	// reg_mprj_datal = *(tmp3+9) << 16;
 	// reg_mprj_datal = *(tmp3+10) << 16;	
-	reg_mprj_datal = 0xAB510000;
+	reg_mprj_datal = 0xAB530000;
 
 
 
@@ -209,13 +218,5 @@ void main()
 	//print("Monitor: Test 1 Passed\n\n");	// Makes simulation very long!
 	// reg_mprj_datal = 0xAB510000;
 
-#ifdef USER_PROJ_IRQ0_EN	
-	// unmask USER_IRQ_0_INTERRUPT
-	mask = irq_getmask();
-	mask |= 1 << USER_IRQ_0_INTERRUPT; // USER_IRQ_0_INTERRUPT = 2
-	irq_setmask(mask);
-	// enable user_irq_0_ev_enable
-	user_irq_0_ev_enable_write(1);	
-#endif
 }
 

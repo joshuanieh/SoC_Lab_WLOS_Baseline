@@ -18,6 +18,8 @@
 `timescale 1 ns / 1 ps
 
 module uart_tb;
+	parameter UART_START_DELAY = 5000000;
+
 	reg clock;
     reg RSTB;
 	reg CSB;
@@ -160,35 +162,27 @@ module uart_tb;
 		$finish;
 	end
 	initial begin
-		$monitor("checkbits=%h at time %t", checkbits,$time);
+		// $monitor("checkbits=%h at time %t", checkbits,$time);
 		fork
 			mm_test;
-			latency_count;
-		join
+			// latency_count;
+		// join
 		
-		fork
+		// fork
+			#(UART_START_DELAY) send_data_2;
 			qs_test;
-			latency_count;
-		join
+			// latency_count;
+		// join
 
-		fork
+		// fork
 			fir_test;
-			latency_count;
+			// latency_count;
 		join
-		send_data_2;
-		//wait(checkbits == 61);
-		//send_data_1;
-		//wait(checkbits == 15);
-		//#10000;
-		//$display("LA Test 1 passed");
-
-		//wait(checkbits == 16'hAB51);
-		//$display("LA Test 1 passed");
-		//$finish;		
+		$finish;	
 	end
 	task latency_count; begin
-		cycle_count = 0;
 		wait(checkbits === 16'hAB40);
+		cycle_count = 0;
 		while(checkbits !== 16'hAB51) begin
 			@(posedge clock);
 			cycle_count = cycle_count + 1;
@@ -206,19 +200,11 @@ module uart_tb;
 			pre_checkbits = checkbits;
 			i = i+1;
 		end
-		// wait(checkbits == 16'h003E);
-		// $display("Call function matmul() in User Project BRAM (mprjram, 0x38000000) return value passed, 0x%x", checkbits);
-		// wait(checkbits == 16'h0044);
-		// $display("Call function matmul() in User Project BRAM (mprjram, 0x38000000) return value passed, 0x%x", checkbits);
-		// wait(checkbits == 16'h004A);
-		// $display("Call function matmul() in User Project BRAM (mprjram, 0x38000000) return value passed, 0x%x", checkbits);
-		// wait(checkbits == 16'h0050);
-		// $display("Call function matmul() in User Project BRAM (mprjram, 0x38000000) return value passed, 0x%x", checkbits);		
 		wait(checkbits == 16'hAB51);
 		$display("LA Test mm ended");
 	end endtask
 	task qs_test;begin
-		wait(checkbits == 16'hAB40);
+		wait(checkbits == 16'hAB41);
 		pre_checkbits = checkbits;
 		$display("LA Test qs started");
 		i = 0;
@@ -228,20 +214,11 @@ module uart_tb;
 			pre_checkbits = checkbits;
 			i = i+1;
 		end
-
-		// wait(checkbits == 16'd40);
-		// $display("Call function qs() in User Project BRAM (mprjram, 0x38000000) return value passed, 0x%x", checkbits);
-		// wait(checkbits == 16'd893);
-		// $display("Call function qs() in User Project BRAM (mprjram, 0x38000000) return value passed, 0x%x", checkbits);
-		// wait(checkbits == 16'd2541);
-		// $display("Call function qs() in User Project BRAM (mprjram, 0x38000000) return value passed, 0x%x", checkbits);
-		// wait(checkbits == 16'd2669);
-		// $display("Call function qs() in User Project BRAM (mprjram, 0x38000000) return value passed, 0x%x", checkbits);		
-		wait(checkbits == 16'hAB51);
+		wait(checkbits == 16'hAB52);
 		$display("LA Test qs ended");
 	end endtask
 	task fir_test;begin
-		wait(checkbits == 16'hAB40);
+		wait(checkbits == 16'hAB42);
 		pre_checkbits = checkbits;
 		$display("LA Test fir started");
 		i = 0;
@@ -251,29 +228,19 @@ module uart_tb;
 			pre_checkbits = checkbits;
 			i = i+1;
 		end
-		// $display("LA Test fir started");
-		// wait(checkbits == 16'd0);
-		// $display("Call function fir() in User Project BRAM (mprjram, 0x38000000) return value passed, 0x%x", checkbits);
-		// wait(checkbits == -16'd10);
-		// $display("Call function fir() in User Project BRAM (mprjram, 0x38000000) return value passed, 0x%x", checkbits);
-		// wait(checkbits == -16'd29);
-		// $display("Call function fir() in User Project BRAM (mprjram, 0x38000000) return value passed, 0x%x", checkbits);
-		// wait(checkbits == 16'd35);
-		// $display("Call function fir() in User Project BRAM (mprjram, 0x38000000) return value passed, 0x%x", checkbits);		
-		wait(checkbits == 16'hAB51);
+		wait(checkbits == 16'hAB53);
 		$display("LA Test fir ended");
 
 	end endtask
-	task send_data_1;begin
+	task send_uart_finish_pattern;begin
 		@(posedge clock);
 		tx_start = 1;
-		tx_data = 15;
+		tx_data = 10;
 		
 		#50;
 		wait(!tx_busy);
 		tx_start = 0;
-		$display("tx complete 1");
-		
+		$display("tx sent finish pattern \\n");
 	end endtask
 
 	task send_data_2;begin
@@ -285,7 +252,17 @@ module uart_tb;
 		wait(!tx_busy);
 		tx_start = 0;
 		$display("tx complete 2");
+
 		
+		#500000;
+		tx_start = 1;
+		tx_data = 10;
+		
+		#50;
+		wait(!tx_busy);
+		tx_start = 0;
+		$display("tx sent finish pattern \\n");
+		// send_uart_finish_pattern;
 	end endtask
 
 	initial begin
