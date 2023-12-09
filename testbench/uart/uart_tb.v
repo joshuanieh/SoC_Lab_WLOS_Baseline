@@ -25,7 +25,7 @@ module uart_tb;
 	reg CSB;
 
 	reg power1, power2;
-
+	reg uart_done, workload_done;
 	wire gpio;
 	wire [37:0] mprj_io;
 	wire [15:0] checkbits;
@@ -165,25 +165,17 @@ module uart_tb;
 		// $monitor("checkbits=%h at time %t", checkbits,$time);
 		fork
 			mm_test;
-			// latency_count;
-		// join
-		
-		// fork
 			#(UART_START_DELAY) send_data_2;
 			qs_test;
-			// latency_count;
-		// join
-
-		// fork
 			fir_test;
-			// latency_count;
+			latency_count;
 		join
 		$finish;	
 	end
 	task latency_count; begin
 		wait(checkbits === 16'hAB40);
 		cycle_count = 0;
-		while(checkbits !== 16'hAB51) begin
+		while(checkbits !== 16'hAB53) begin
 			@(posedge clock);
 			cycle_count = cycle_count + 1;
 		end
@@ -255,6 +247,7 @@ module uart_tb;
 
 		
 		#500000;
+		@(posedge clock);
 		tx_start = 1;
 		tx_data = 10;
 		
@@ -262,6 +255,7 @@ module uart_tb;
 		wait(!tx_busy);
 		tx_start = 0;
 		$display("tx sent finish pattern \\n");
+		// uart_done = 1;
 		// send_uart_finish_pattern;
 	end endtask
 
